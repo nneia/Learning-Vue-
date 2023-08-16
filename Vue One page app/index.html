@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue JS Basics</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <navbar
+        :pages="pages"
+        :active-page="activePage"
+        :nav-click="(index) => activePage = index" //Event of clicking navbar transmitts index and its being changed
+        @theme-toggled="changeTheme" //Emmitted toggle = changeTheme function
+    >
+
+    </navbar>
+    <page-content
+        :page = "pages[activePage]" //Vbind makes it possible to use page as the object in the compnonents template to output properties
+        :theme = "theme" //Pass the theme from the parent component as a prop
+        >
+
+    </page-content>
+
+    <script>
+
+        let app = Vue.createApp({
+            data() { 
+                return{
+                    activePage: 0,
+                    theme: 'dark',
+                    pages: [
+                        {
+                            link: {text: 'Home', url: 'index.html'},
+                            pageTitle: 'Hello Vue',
+                            content: 'Welcome to a wonderfull world of Vue'
+                        },
+                        {
+                            link: {text: 'About', url: 'about.html'},
+                            pageTitle: 'About page',
+                            content: 'Welcome to a wonderfull world of Vue'
+                        },
+                        {
+                            link: {text: 'Contact', url: 'contact.html'},
+                            pageTitle: 'Contact page',
+                            content: 'Welcome to a wonderfull world of Vue'
+                        },
+                    ],
+                
+                    
+                 }
+            },
+            methods: {
+                changeTheme() {
+                    this.theme = this.theme === 'dark'? 'light' : 'dark'
+                }, 
+            }
+        });
+        
+        app.component('page-content', {
+            props: ['page', 'theme'],
+            template:`
+
+            <div class="container"
+                :class=[\`theme-\${theme}\`,]
+            >
+                <h1>{{page.pageTitle}}</h1>
+                <p>{{page.content}}</p>
+            </div>
+
+            `
+
+        })
+
+        app.component('navbar', {
+            props: ['pages', 'activePage', 'navClick'],
+            template: `
+                <nav 
+                    class="nav-bar"
+                >
+                    <a class="nav-title" href="#">My Vue</a>
+                    <ul>
+                        <li v-for="(page, index) in pages" :key="index">
+                            <a
+                                class="nav-link"
+                                :class="{active: activePage == index}"// add active class when...
+                                :href="page.link.url"
+                                :title="\`This link goes to the \${page.link.text} page\`"
+                                @click.prevent="navClick(index)"  //Action click
+                            >{{page.link.text}}</a>
+                        </li>
+                    </ul>
+                    <form class="d-flex">
+                        <button
+                            class="btn-nav"
+                            @click.prevent="$emit('theme-toggled')" //Emit the toggle to changeTheme function
+                        >Theme</button>
+                    </form>
+                </nav>
+            `
+        })
+        
+        app.mount('body')
+    </script>
+</body>
+</html>
